@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="osm_bridge" pkg="ropod_wm_mediator" type="osm_wm_bridge.py" output="screen">
+        <param name="overpass_url" value="http://127.0.0.1:8000/api/interpreter" />
+        <param name="ref_latitude" value="50.1363485" />  <!-- same ref latitude should be used here and for map generation -->
+        <param name="ref_longitude" value="8.6474024" /> 
+    </node>  
+    <node name="ropod_semantic_localization" pkg="ropod_semantic_localization" type="ropod_semantic_localization" output="screen">
+    </node>
+</launch>

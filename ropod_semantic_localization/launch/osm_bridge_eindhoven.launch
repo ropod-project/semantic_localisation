@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<launch>
+    <node name="osm_bridge" pkg="ropod_wm_mediator" type="osm_wm_bridge.py" output="screen">
+        <param name="overpass_url" value="http://127.0.0.1:8000/api/interpreter" />
+        <param name="ref_latitude" value="51.4473635" />  <!-- same ref latitude should be used here and for map generation -->
+        <param name="ref_longitude" value="5.4900916" /> 
+    </node>  
+    <node name="ropod_semantic_localization" pkg="ropod_semantic_localization" type="ropod_semantic_localization" output="screen">
+    </node>
+    <node name="tf_broadcaster" pkg="robot_setup_tf" type="tf_broadcaster" output="screen">
+    </node>
+    <node pkg="rviz" type="rviz" name="rviz" args="-d /home/martin/catkin_ws_test/src/ropod_semantic_localization/parameters/tools/Semantic_Localization.rviz" />
+</launch>

@@ -1,0 +1,47 @@
+<?xml version='1.0'?>
+<sdf version='1.5'>
+ <world name="default">
+   <include>
+      <uri>model://sun</uri>
+   </include>
+   <include>
+      <uri>model://ground_plane</uri>
+   </include>
+   
+   <include>
+      <uri>model://ropod</uri>
+      <pose>-2.0 4.5 0.0 0.0 0.0 0.0</pose>      
+    </include>
+   
+    <include>
+      <uri>model://pillar</uri>
+      <name>pillar1</name>
+      <pose>32.100510 6.769004 0.0 0.0 0.0 0.0</pose>      
+    </include>
+    
+    <include>
+      <uri>model://pillar</uri>
+      <name>pillar2</name>
+      <pose>2.342716 5.768001 0.0 0.0 0.0 0.0</pose>      
+    </include>
+    
+    <include>
+      <uri>model://pillar</uri>
+      <name>pillar3</name>
+      <pose>17.231846 6.274395 0.0 0.0 0.0 0.0</pose>      
+    </include> 
+  
+    <include>
+      <uri>model://pillar</uri>
+      <name>pillar4</name>
+      <pose>24.666746 6.505016 0.0 0.0 0.0 0.0</pose>      
+    </include> 
+    
+    <include>
+      <uri>model://pillar</uri>
+      <name>pillar5</name>
+      <pose>9.784185 6.009955 0.0 0.0 0.0 0.0</pose>      
+    </include> 
+    
+ </world>
+</sdf>

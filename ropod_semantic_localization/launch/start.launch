@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- Configurable Parameters -->
+	<arg name="robotName" default="ropod_tue_1"/>   
+	<arg name="robotCommonName" default="ropod"/>   
+	<arg name="loadName" default="mobidik"/>   
+	<arg name="LOAD_ATTACHED" default="false" />	
+	<arg name="laser" default="true"/>
+	<arg name="laser1_name" value ="laser"/>
+	<arg name="asus_cam" default="false"/> 
+	<arg name="asus_cam_name" value="asusxtion"/>
+	<arg name="asus_cam_calibration" default="false"/>
+
+        <arg name="floorplan" default="/home/martin/catkin_ws_test/Map_test_swag/casual_urdfje"/>
+	<arg name="ROBOT_REAL" default="$(optenv ROBOT_REAL)" />
+	<arg name="robot_path" default="$(env CATKIN_WORKSPACE)/src/platform"/>
+	<arg name="robot_bringup_path" default="$(arg robot_path)/$(arg robotName)_bringup"/>
+
+	<!--OSM stuff -->
+	<node name="osm_bridge" pkg="ropod_wm_mediator" type="osm_wm_bridge.py" output="screen">
+	  <param name="overpass_url" value="http://127.0.0.1:8000/api/interpreter" />
+	  <param name="ref_latitude" value="51.4473635" />  <!-- same ref latitude should be used here and for map generation -->
+	  <param name="ref_longitude" value="5.4900916" /> 
+	</node>  
+
+	<node pkg="rviz" type="rviz" name="rviz" args="-d /home/martin/catkin_ws_test/src/ropod_semantic_localization/parameters/tools/Semantic_Localization.rviz" />
+	
+	<node name="pillar_detector" pkg="pillar_detector" type="detector_server" output="screen">
+	    <param name="robot" value="$(arg robotCommonName)"/>
+	</node>
+
+	<node name="ropod_semantic_localization" pkg="ropod_semantic_localization" type="ropod_semantic_localization" output="screen">
+	    <param name="robot" value="$(arg robotCommonName)"/>
+	</node>
+		
+	<group unless="$(arg ROBOT_REAL)">
+	
+		<!-- SIMULATION -->  
+		<group unless="$(arg LOAD_ATTACHED)">	  
+			<include file="/home/martin/catkin_ws_test/src/ropod_semantic_localization/simulation/gazebo_simulator.launch" >
+			<arg name="robot" value="$(arg robotCommonName)" />
+			<arg name="model_name" value="$(arg robotCommonName)" /> 
+			<arg name="model_path" value="$(arg robot_path)/$(arg robotCommonName)_sim_model" />
+			</include>
+	   
+			<!-- Launch tf broadcaster for ropod robot -->
+			<node pkg="$(arg robotName)_bringup" type="ropod_mobidik_tf_broadcaster_only_ropod" name="ropod_mobidik_tf_broadcaster_only_ropod" />
+		</group>
+       
+
+		<group if="$(arg LOAD_ATTACHED)">
+		
+			<include file="$(find robot_common)/launch/simulator/gazebo_simulator.launch" >
+			<arg name="robot" value="$(arg robotCommonName)" />
+			<arg name="model_name" value="$(arg robotCommonName)_$(arg loadName)" />				
+			<arg name="model_path" value="$(arg robot_path)/$(arg robotCommonName)_model" />
+			</include>
+			 
+			<!-- Launch tf broadcaster for ropod robot -->
+			<node pkg="$(arg robotName)_bringup" type="ropod_mobidik_tf_broadcaster_simulator" name="ropod_mobidik_tf_broadcaster_simulator" />
+		</group>
+		
+		<!-- Specify static transforms -->
+		<include file="$(arg robot_bringup_path)/parameters/hardware/static_tf.launch">160000
+		<arg name="robot" value="$(arg robotCommonName)" />
+		<arg name="laser1" value="$(arg laser1_name)"/>
+		</include> 
+		
+		<!-- Add floorplan. -->
+		 <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(arg floorplan).urdf -urdf -model floorplan"/>
+	</group>
+
+</launch>

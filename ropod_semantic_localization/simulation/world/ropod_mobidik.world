@@ -1,0 +1,33 @@
+<?xml version='1.0'?>
+<sdf version='1.5'>
+ <world name="default">
+   <include>
+      <uri>model://sun</uri>
+   </include>
+   <include>
+      <uri>model://ground_plane</uri>
+   </include>
+   
+   <include>
+      <uri>model://ropod_mobidik</uri>
+      <pose>-4.9 10.8 0.0 0.0 0.0 -1.54</pose>      
+    </include>
+    
+ <!--   
+   <include>
+      <uri>model://mobidik</uri>      
+    </include>
+ 
+   <include>
+      <uri>model://ropod</uri>      
+      <pose>1.045 0 0 0 0 0</pose>  
+    </include>
+    
+    <joint name="ropod_mobidik_joint" type="fixed">
+      <child>mobidik::base_link</child>
+      <parent>ropod::base_link</parent>
+    </joint>
+    -->
+
+ </world>
+</sdf>

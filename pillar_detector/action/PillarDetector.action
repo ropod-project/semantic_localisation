@@ -1,0 +1,6 @@
+float32[] diameter
+geometry_msgs/PoseWithCovariance[] pose
+string detect
+---
+int32 test
+---
