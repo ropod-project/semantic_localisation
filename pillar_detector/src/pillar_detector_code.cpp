@@ -1,7 +1,7 @@
-#include "/home/martin/catkin_ws_test/src/pillar_detector/include/pillar_detector/pillar_detector.h"
+#include "/home/martin/catkin_ws_test/src/semantic_localisation/pillar_detector/include/pillar_detector/pillar_detector.h"
 //#include <pillar_detector/pillar_detector.h>
  
-point robotpol_2_robotcart( polpoint p)
+point PillarDetector::robotpol_2_robotcart( polpoint p)
 {
   point result;
   result.x = p.r *cos(p.a);
@@ -9,7 +9,7 @@ point robotpol_2_robotcart( polpoint p)
   return result; 
 }
 
-polpoint robotcart_2_robotpol( point p)
+polpoint PillarDetector::robotcart_2_robotpol( point p)
 {
   polpoint result;
   result.r = sqrt( pow(p.x,2) + pow(p.y ,2) );
@@ -25,14 +25,14 @@ polpoint  PillarDetector::scan_2_robotpol( int i)
   return result;
 }
 
-float Calc_Distance( point a, point b)
+float PillarDetector::Calc_Distance( point a, point b)
 {
   float result;
   result = hypot( (b.x - a.x) , (b.y - a.y) );
   return result;
 }
 
-point FindCircleCenter( point p1, point p2, point p3, float diameter)
+point PillarDetector::FindCircleCenter( point p1, point p2, point p3, float diameter)
 {
   point circle_center;
   float p2p_distance;
@@ -65,11 +65,11 @@ point FindCircleCenter( point p1, point p2, point p3, float diameter)
 }
 
 
-bool CheckInlier( point circle_center, point sample , float diameter, float diameter_error)
+bool PillarDetector::CheckInlier( point circle_center, point sample , float diameter, float diameter_error)
 {
   float d;
   d = Calc_Distance( circle_center, sample );
-  if( sqrt( pow( (d- (diameter/2) ) , 2 ) ) < diameter_error)
+  if( sqrt( pow( ( d- (diameter/2) ) , 2 ) ) < diameter_error)
   {
     return true;
   }
@@ -86,7 +86,7 @@ int PillarDetector::Nearest_Beam_Index( float angle)
   return result;
 }
 
-bool InRange(float r, float min, float max)
+bool PillarDetector::InRange(float r, float min, float max)
 {
   if( (min < r) && (r < max))
   {
@@ -97,16 +97,19 @@ bool InRange(float r, float min, float max)
     return false;
   }
 }
-  
 
-int PillarDetector::CalcSearchRange(polpoint p, float diameter)
+int PillarDetector::CalcSearchRange(polpoint p, float radius)
 {
   int result;
-  result = round( atan2( diameter, p.r )/ scan_result->angle_increment);
+  if( p.r < radius )  // prevent asin( |arg| > 1) = Nan
+  {
+    p.r = radius;
+  }
+  result = round( asin( radius/ p.r )/scan_result->angle_increment );
   return result;
 }
 
-std::tuple< float, float > PillarDetector::CalcRange( geometry_msgs::PoseWithCovariance initial_guess )
+std::tuple< float, float > PillarDetector::CalcRange( geometry_msgs::PoseStamped initial_guess )
 {
   std::tuple< float, float> range;
   range = std::make_tuple(0.0, 0.0);
@@ -166,29 +169,77 @@ std::tuple<point,bool> PillarDetector::FindPillarCandidate(int index_min, int in
   return result;
 }
 
-void PillarDetector::Detect( const pillar_detector::PillarDetectorGoalConstPtr goal )
+void PillarDetector::VisualizeDetections()
+{
+  visualization_msgs::MarkerArray markerarray;
+  point pillar_point;
+  int i = 17000;
+  markerarray.markers.clear();
+  int k = 0;
+  for( auto it_pillars = pillars.begin(); it_pillars != pillars.end(); it_pillars++)
+  {
+    i++;
+    pillar_point = std::get<0>(pillars[k]);
+    visualization_msgs::Marker marker;
+    marker.color.a = 1.0;
+    marker.color.r = 0.0;
+    marker.color.g = 1.0;
+    marker.color.b = 0.0; 
+    marker.pose.position.x = pillar_point.x;
+    marker.pose.position.y = pillar_point.y;
+    marker.pose.position.z = 1;
+    marker.pose.orientation.w = 1.0;
+    marker.id = i;
+    marker.header.frame_id = "ropod/laser/scan";
+    marker.header.stamp = ros::Time(0);
+    marker.ns = "my_namespace";
+    marker.type = visualization_msgs::Marker::CYLINDER;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.orientation.w = 1.0;
+    marker.scale.x = 0.66;  // Hardcoded the diameter, not really a way to change this yet
+    marker.scale.y = 0.66;
+    marker.scale.z = 2;
+    markerarray.markers.push_back(marker);
+    k++;
+  }
+  vis_pub.publish(markerarray);
+}
+
+
+void PillarDetector::Detect( const pillar_detector::PillarDetectorGoalConstPtr goal ) 
 { 
+  pillars.clear();
+  std::tuple<point, float> pillar;
   std::tuple< point, bool> fpc;
   point pc; 
   polpoint ppc;
   polpoint pps;
   point    ps;
+  bool duplicate;
+  bool print = false;
+  bool visualize = true;
   int min_index;
   int max_index;
+  int max_iter;
   int pc_index;
   int inlier;
-  int max_iter = 1000; // minimum N maximum N^3 searches, change later to different iterators for each step
-  float diameter = goal->diameter[0];
-  float diameter_error = 0.01;
-  if(false)
-  {
-    //angle_min = function;
-    //angle_max = function;
-  }
+  int inlier_min = 12; 
+  int expected_inlier_amount;
+  float inlier_percentage_min = 0.75;
+  int buffer_range = 3;
+  float diameter = goal->diameter;
+  float diameter_error = 0.005;
+  float inlier_percentage;
+  int edge_index_low;
+  int edge_index_high;
+  
+  int index_min = Nearest_Beam_Index(scan_result->angle_min);
+  int index_max = Nearest_Beam_Index(scan_result->angle_max);
+  max_iter = round( (index_max - index_min)/2 );
   for(int i = 0; i< max_iter; i++ )
   {
-    int index_min = Nearest_Beam_Index(scan_result->angle_min);
-    int index_max = Nearest_Beam_Index(scan_result->angle_max);
+    feedback.iter = i;
+    pillar_detector_server.publishFeedback(feedback);
     int inlier_search_range;
     fpc = FindPillarCandidate( index_min, index_max, diameter, diameter_error, max_iter ); 
     if( std::get<1>(fpc))
@@ -196,11 +247,11 @@ void PillarDetector::Detect( const pillar_detector::PillarDetectorGoalConstPtr g
       pc = std::get<0>(fpc);
       ppc = robotcart_2_robotpol(pc);
       pc_index = Nearest_Beam_Index(ppc.a);
-      inlier_search_range = CalcSearchRange( ppc, (diameter/2) ) +3;
+      inlier_search_range = CalcSearchRange( ppc, (diameter/2) ) + buffer_range;
       min_index = pc_index - inlier_search_range;
       max_index = pc_index + inlier_search_range;
       if( min_index < 0 ){ min_index =0;}
-      if( max_index > scan_result->ranges.size()){ max_index = scan_result->ranges.size();}
+      if( max_index > (scan_result->ranges.size())){ max_index = (scan_result->ranges.size());}
       inlier =0;
       for( int j = min_index; j<max_index; j++)
       {
@@ -211,12 +262,56 @@ void PillarDetector::Detect( const pillar_detector::PillarDetectorGoalConstPtr g
 	  inlier++;
 	}
       }
-      if( (inlier > 20) &&  (inlier > 0.8*CalcSearchRange( ppc, (diameter) )) )
+      expected_inlier_amount = 2*CalcSearchRange( ppc , (diameter/2) );
+      if( (inlier > inlier_min) &&  ( (float)inlier >  (inlier_percentage_min * (float)expected_inlier_amount) ) && expected_inlier_amount > inlier_min ) 
       {
-	ROS_INFO("inlier search range %i", inlier_search_range);
-	ROS_INFO("pc_index %i", pc_index);
-	ROS_INFO("pc.x: %f pc.y: %f", pc.x, pc.y);
+	inlier_percentage = (float)inlier / (float)expected_inlier_amount;
+	if( inlier_percentage > 1){ inlier_percentage = 1;}
+	pillar = std::make_tuple( pc , inlier_percentage);
+	if( !pillars.empty())
+	{
+	  duplicate = false;
+	  int k = 0;
+	  for( auto it_pillar = pillars.begin(); it_pillar < pillars.end(); it_pillar++)
+	  {
+	    if( Calc_Distance( std::get<0>( pillars[k] ) , pc) < diameter )
+	      {
+		duplicate = true;
+		if( std::get<1>( pillars[k] ) < inlier_percentage)
+		{
+		  pillars.erase( pillars.begin() + k);
+		  pillars.push_back( pillar );
+		}
+	      }
+	    k++;
+	  }
+	  if( !duplicate)
+	  {
+	    pillars.push_back( pillar );
+	  }
+	}
+	else
+	{
+	  pillars.push_back( pillar );
+	}
       }
+    }
+  }
+  if( visualize )
+  {
+    VisualizeDetections();
+  }
+  if( print)
+  {
+    int l=0;
+    for( auto it_pillar = pillars.begin(); it_pillar < pillars.end(); it_pillar++)
+    {
+      point pc = std::get<0>(pillars[l]);
+      float in = std::get<1>(pillars[l]);
+      ROS_INFO("Pillar %i found at:", l);
+      ROS_INFO("pc.x : %f pc.y: %f", pc.x, pc.y);
+      ROS_INFO("inlierpercentage: %f", in);
+      l++;
     }
   }
 }

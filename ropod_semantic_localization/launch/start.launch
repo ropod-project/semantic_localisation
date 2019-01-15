@@ -11,11 +11,13 @@
 	<arg name="asus_cam_name" value="asusxtion"/>
 	<arg name="asus_cam_calibration" default="false"/>
 
-        <arg name="floorplan" default="/home/martin/catkin_ws_test/Map_test_swag/casual_urdfje"/>
+        <arg name="floorplan" default="/home/martin/catkin_ws_test/src/semantic_localisation/ropod_semantic_localization/simulation/floorplan/Gemini_zuid"/>
 	<arg name="ROBOT_REAL" default="$(optenv ROBOT_REAL)" />
 	<arg name="robot_path" default="$(env CATKIN_WORKSPACE)/src/platform"/>
 	<arg name="robot_bringup_path" default="$(arg robot_path)/$(arg robotName)_bringup"/>
 
+	<node pkg="rviz" type="rviz" name="rviz" args="-d /home/martin/catkin_ws_test/src/semantic_localisation/ropod_semantic_localization/parameters/tools/Semantic_Localization.rviz" />
+	
 	<!--OSM stuff -->
 	<node name="osm_bridge" pkg="ropod_wm_mediator" type="osm_wm_bridge.py" output="screen">
 	  <param name="overpass_url" value="http://127.0.0.1:8000/api/interpreter" />
@@ -23,21 +25,41 @@
 	  <param name="ref_longitude" value="5.4900916" /> 
 	</node>  
 
-	<node pkg="rviz" type="rviz" name="rviz" args="-d /home/martin/catkin_ws_test/src/ropod_semantic_localization/parameters/tools/Semantic_Localization.rviz" />
 	
+
 	<node name="pillar_detector" pkg="pillar_detector" type="detector_server" output="screen">
 	    <param name="robot" value="$(arg robotCommonName)"/>
+	</node>
+	
+	<node name="wall_detector" pkg="wall_detector" type="wall_detector_server" output="screen">
+	    <param name="robot" value="$(arg robotCommonName)"/>
+	</node>  
+
+	<node name="aruco_detector" pkg="aruco_detection" type="Multiple_Aruco.py" output="screen">
+	</node> 
+	
+	<!--
+	<node name="wall_detector_test" pkg="wall_detector" type="wall_detector_test"/>
+	-->
+	<!-- temporary fix to check visualization TODO REMOVE this and get tf_broadcaster working-->
+	<!--
+	<node pkg="tf" type="static_transform_publisher" name="odom2map" args="0 0 0 0 0 0 1 /map /$(arg robotCommonName)/odom  100" />
+	-->
+	<node name="tf_broadcaster_localization" pkg="ropod_semantic_localization" type="tf_broadcaster_localization" output="screen">
 	</node>
 
 	<node name="ropod_semantic_localization" pkg="ropod_semantic_localization" type="ropod_semantic_localization" output="screen">
 	    <param name="robot" value="$(arg robotCommonName)"/>
+	</node>
+	
+	<node name="semantic_planner" pkg="ropod_semantic_localization" type="semantic_planner" output="screen">
 	</node>
 		
 	<group unless="$(arg ROBOT_REAL)">
 	
 		<!-- SIMULATION -->  
 		<group unless="$(arg LOAD_ATTACHED)">	  
-			<include file="/home/martin/catkin_ws_test/src/ropod_semantic_localization/simulation/gazebo_simulator.launch" >
+			<include file="/home/martin/catkin_ws_test/src/semantic_localisation/ropod_semantic_localization/simulation/gazebo_simulator2.launch" >
 			<arg name="robot" value="$(arg robotCommonName)" />
 			<arg name="model_name" value="$(arg robotCommonName)" /> 
 			<arg name="model_path" value="$(arg robot_path)/$(arg robotCommonName)_sim_model" />
@@ -65,7 +87,13 @@
 		<arg name="robot" value="$(arg robotCommonName)" />
 		<arg name="laser1" value="$(arg laser1_name)"/>
 		</include> 
-		
+	
+		<!-- tilt -->
+		<node pkg="tf" type="static_transform_publisher" name="base2kinect" args="0.25 0 0.35 0 -0.471238898 0 /$(arg robotCommonName)/base_link /camera_link 100" />
+		<!-- no tilt -->
+		<!--
+		<node pkg="tf" type="static_transform_publisher" name="base2kinect" args="0.25 0 0.5 0 0 0 /$(arg robotCommonName)/base_link /camera_link 100" />
+		-->
 		<!-- Add floorplan. -->
 		 <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-file $(arg floorplan).urdf -urdf -model floorplan"/>
 	</group>

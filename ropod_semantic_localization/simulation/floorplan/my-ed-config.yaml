@@ -1,0 +1,12 @@
+world:
+- id: walls
+  shape:
+    heightmap:
+        image: $(file Gemini_zuid.pgm)
+        height: 2
+        resolution: 0.025
+        pose: { x: 0.0, y: 0.0, z: 0 }
+
+plugins:
+    - name: gui_server
+      lib: libed_gui_server_plugin.so

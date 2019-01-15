@@ -1,10 +1,6 @@
 #ifndef PILLAR_DETECTOR_H
 #define PILLAR_DETECTOR_H
 
-// 
-#include <pillar_detector/PillarDetectorAction.h>
-
-
 // C++
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,9 +21,12 @@
 #include <ros/console.h>
 #include <tf/tf.h>
 #include <tf/transform_broadcaster.h>
-#include "sensor_msgs/LaserScan.h"
-#include "std_msgs/Float32.h"
+#include <sensor_msgs/LaserScan.h>
+#include <std_msgs/Float32.h>
 #include <ros/callback_queue.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
+#include <pillar_detector/PillarDetectorAction.h>
 
 const float  PI_F=3.14159265358979f;
 const double PI  =3.141592653589793238463;
@@ -50,7 +49,9 @@ private:
     void pillar_detector_server_execute( const pillar_detector::PillarDetectorGoalConstPtr &goal);
     void displayLaserdata(const sensor_msgs::LaserScan::ConstPtr& scan);
     pillar_detector::PillarDetectorResult result;
+    pillar_detector::PillarDetectorFeedback feedback;
     ros::Subscriber scan_sub;
+    ros::Publisher vis_pub = nh_.advertise<visualization_msgs::MarkerArray>( "detected_pillars", 0 );
     std::queue<sensor_msgs::LaserScan::ConstPtr> scan_buffer_;
 
 public:
@@ -59,16 +60,20 @@ public:
     virtual ~PillarDetector();
     void Detect( const pillar_detector::PillarDetectorGoalConstPtr goal );
     void InitializeBuffer( std::string robot);
-    std::tuple< float, float > CalcRange( geometry_msgs::PoseWithCovariance initial_guess );
+    void VisualizeDetections();
+    std::tuple< float, float > CalcRange( geometry_msgs::PoseStamped initial_guess );
     std::tuple<point,bool> FindPillarCandidate(int index_min, int index_max, float diameter, float diameter_error, int max_iter);
+    point robotpol_2_robotcart( polpoint p);
     polpoint scan_2_robotpol( int i);
+    polpoint robotcart_2_robotpol( point p);
+    point FindCircleCenter( point p1, point p2, point p3, float diameter);
     int Nearest_Beam_Index( float angle);
     int CalcSearchRange(polpoint p, float diameter);
+    float Calc_Distance( point a, point b);
+    bool CheckInlier( point circle_center, point sample , float diameter, float diameter_error);   
+    bool InRange(float r, float min, float max);
+    std::vector< std::tuple <point, float> > pillars;
 };
-    //tf::Quaternion q(x,y,z,w); 
-    //double roll,pitch,yaw;
-    //tf::Matrix3x3 m(q);
-    //m.getRPY(roll, pitch,yaw);
 
 
 #endif /* PILLAR_DETECTOR_H */

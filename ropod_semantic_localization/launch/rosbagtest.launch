@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="rosbag" type="play" name="rosbag_player" args=" -l /home/martin/catkin_ws_test/bagfiles/Pillar_detector/open_ruimte.bag"/>
+  <node pkg="tf" type="static_transform_publisher" name="static_transform_publisher" args="0 0 0 0 0 0 1 /rosbag_player /ropod/base_link 100"/>
+  <node name="pillar_detector" pkg="pillar_detector" type="detector_server" output="screen">
+    <param name="robot" value="ropod_tue_1"/>
+  </node>  
+  <node name="wall_detector" pkg="wall_detector" type="wall_detector_server" output="screen">
+    <param name="robot" value="ropod_tue_1"/>
+  </node>  
+  <node name="pillar_detector_test" pkg="pillar_detector" type="detector_test"/>
+  <node name="wall_detector_test" pkg="wall_detector" type="wall_detector_test"/>
+  <node pkg="rviz" type="rviz" name="rviz" 
+	args="-d /home/martin/catkin_ws_test/src/semantic_localisation/ropod_semantic_localization/parameters/tools/rosbag_test.rviz" 
+	launch-prefix="xterm -e"/>
+</launch>

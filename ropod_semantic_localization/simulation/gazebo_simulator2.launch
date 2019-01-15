@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+
+	<env name="GAZEBO_MODEL_PATH" value="$(find ropod_sim_model)/simulator/models:$(optenv GAZEBO_MODEL_PATH):$(find ropod_semantic_localization)/simulation/models"/>
+	<env name="GAZEBO_RESOURCE_PATH" value="$(find ropod_sim_model)/simulator:$(optenv GAZEBO_RESOURCE_PATH):$(find ropod_semantic_localization)/simulation"/>
+        <env name="GAZEBO_PLUGIN_PATH" value="$(env CATKIN_WORKSPACE)/devel/lib:$(optenv GAZEBO_PLUGIN_PATH)"/>
+
+	<!--<env name="GAZEBO_MODEL_DATABASE_URI" value="" /> THIS VARIABLE SHOULD BE CHANGED LOCALLY, 
+	see http://cstwiki.wtb.tue.nl/index.php?title=RoPod/Tutorials/GAZEBO_installation_and_interface_with_ROS/Faster statup of Gazebo -->
+	
+	<arg name="robot" default="pico"/>
+	<arg name="model_name" default="pico"/> 
+	<arg name="model_path" />
+        <arg name="movingObjects" default="false" />
+
+        <group unless="$(arg movingObjects)">
+                <include file="$(find gazebo_ros)/launch/empty_world.launch">
+                        <!-- <arg name="verbose" value="true" /> -->
+                          <arg name="world_name" value="/home/martin/catkin_ws_test/src/semantic_localisation/ropod_semantic_localization/simulation/world/ropod.world"/>
+                </include>
+        </group>
+
+        <group if="$(arg movingObjects)">
+                <include file="$(find gazebo_ros)/launch/empty_world.launch">
+                        <!--  <arg name="verbose" value="true" /> -->
+                          <arg name="world_name" value="$(arg model_path)/world/$(arg robot)_movingObjects.world"/>
+                </include>
+        </group>
+	
+	<node name="throttle" pkg="topic_tools" type="throttle" args="messages /$(arg robot)/laser_sim 20.0 /$(arg robot)/laser/scan" />  
+</launch>

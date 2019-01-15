@@ -1,14 +1,15 @@
 #include <ropod_semantic_localization/localization.h>
 
-void Localization::VisualizeFeatures( std::vector< ropod_ros_msgs::OSMNode > nodes )
+void Localization::VisualizeFeatures( std::vector<ropod_ros_msgs::OSMNode> features)
 {
   visualization_msgs::MarkerArray markerarray;
-  for( auto it_nodes = nodes.begin(); it_nodes != nodes.end(); it_nodes++)
+  for( auto it_nodes = features.begin(); it_nodes != features.end(); it_nodes++)
   {
     visualization_msgs::Marker marker;
     marker.id = it_nodes->id;
-    marker.header.frame_id = "/map";
-    marker.header.stamp = ros::Time::now();
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time(0);
+    //marker.header.stamp = ros::Time::now();
     marker.ns = "my_namespace";
     marker.type = visualization_msgs::Marker::CUBE;
     marker.scale.x = .2;
@@ -33,8 +34,8 @@ void Localization::VisualizeFeatures( std::vector< ropod_ros_msgs::OSMNode > nod
       {
 	marker.color.a = 1.0;
 	marker.color.r = 0.0;
-	marker.color.g = 1.0;
-	marker.color.b = 0.0;
+	marker.color.g = 0.0;
+	marker.color.b = 1.0;
       }
       if( it_tags->key =="diameter" )
       {
@@ -53,34 +54,30 @@ void Localization::VisualizeFeatures( std::vector< ropod_ros_msgs::OSMNode > nod
     marker.pose.position.x = it_nodes->x;
     marker.pose.position.y = it_nodes->y;
     marker.pose.orientation.w = 1.0;
-    marker.color.a = 1.0;
 
     markerarray.markers.push_back(marker);
   }
   vis_pub.publish(markerarray);
 }
 
-void Localization::VisualizeSides( std::vector< int > corner_ids, std::vector<ropod_ros_msgs::OSMRelation> side_relations )
+void Localization::VisualizeSides( std::vector<ropod_ros_msgs::OSMRelation> sides, std::vector<ropod_ros_msgs::OSMNode> corners )
 {
-  int id = 30000;
+  int id = 20000;
   int j = 0;
   std::vector< ropod_ros_msgs::OSMNode > nodes;
   ropod_ros_msgs::OSMQueryGoal goal;
   geometry_msgs::Point start_point;
   geometry_msgs::Point end_point;
   visualization_msgs::MarkerArray markerarray;
-    
-  goal.ids= corner_ids;
-  nodes = Query_Nodes( goal );
-  
-  for( int i=0 , e=corner_ids.size(); i<e ; i+=2)
+  markerarray.markers.clear();  
+  for( int i=0 ; i<sides.size() ; i++)
   {
     visualization_msgs::Marker marker;
     marker.color.a = 1.0;
     marker.color.r = 1.0;
     marker.color.g = 1.0;
     marker.color.b = 1.0; 
-    for( auto it_tags = side_relations[j].tags.begin() ; it_tags != side_relations[j].tags.end(); it_tags++)
+    for( auto it_tags = sides[j].tags.begin() ; it_tags != sides[j].tags.end(); it_tags++)
     {
       if( it_tags->key =="colour")
       {
@@ -116,7 +113,7 @@ void Localization::VisualizeSides( std::vector< int > corner_ids, std::vector<ro
       {
 	if( it_tags->value =="glass")
 	{
-	  marker.color.a = 1.0;
+	  marker.color.a = 0.7;
 	  marker.color.r = 0.2;
 	  marker.color.g = 0.5;
 	  marker.color.b = 1.0;
@@ -125,22 +122,14 @@ void Localization::VisualizeSides( std::vector< int > corner_ids, std::vector<ro
     }
     j++;
     id++;
-    for( auto it_nodes = nodes.begin(); it_nodes != nodes.end(); it_nodes++)
-    {
-      if( it_nodes->id == corner_ids[i] )
-      {
-	start_point.x = it_nodes->x;
-	start_point.y = it_nodes->y;
-      }
-      else if (it_nodes->id == corner_ids[i+1])
-      {
-	end_point.x = it_nodes->x;
-	end_point.y = it_nodes->y;
-      }
-    }    
+    start_point.x = corners[2*i].x;
+    start_point.y = corners[2*i].y;
+    end_point.x = corners[(2*i)+1].x;
+    end_point.y = corners[(2*i)+1].y;  
     marker.id = id;
-    marker.header.frame_id = "/map";
-    marker.header.stamp = ros::Time::now();
+    marker.header.frame_id = "map";
+    marker.header.stamp = ros::Time(0);
+    //marker.header.stamp = ros::Time::now();
     marker.ns = "my_namespace";
     marker.type = visualization_msgs::Marker::LINE_STRIP;
     marker.action = visualization_msgs::Marker::ADD;
@@ -153,4 +142,43 @@ void Localization::VisualizeSides( std::vector< int > corner_ids, std::vector<ro
     markerarray.markers.push_back(marker);
   }
   vis_pub.publish(markerarray);
+}
+
+void Localization::VisualizeMarkerDetections()
+{
+  visualization_msgs::MarkerArray markerarray;
+  markerarray.markers.clear();
+  int id = 19000;
+  if( !marker_buffer_.empty() )
+  {
+    markers_current = marker_buffer_.front();
+    if( !markers_current->poses.empty() )
+    {
+      for( auto it_markers = markers_current->poses.begin(); it_markers < markers_current->poses.end(); it_markers++)
+      {
+	visualization_msgs::Marker marker;
+	marker.header.frame_id = "/camera_link";
+	marker.header.stamp = ros::Time(0);
+	//marker.header.stamp = ros::Time::now();
+	marker.ns = "my_namespace";
+	marker.type = visualization_msgs::Marker::CUBE;
+	marker.scale.x = .2;
+	marker.scale.y = .2;
+	marker.scale.z = .2;
+	marker.color.a = 1.0;
+	marker.color.r = 0.0;
+	marker.color.g = 1.0;
+	marker.color.b = 0.0;
+	marker.id = id;
+	marker.action = visualization_msgs::Marker::ADD;
+	marker.pose.position.x = it_markers->position.x;
+	marker.pose.position.y = it_markers->position.y;
+	marker.pose.position.z = it_markers->position.z;
+	marker.pose.orientation.w = 1.0;
+	markerarray.markers.push_back(marker);
+	id++;
+      }
+    }
+  }
+  det_pub.publish(markerarray);
 }

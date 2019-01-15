@@ -6,7 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /Query_Result1
+        - /DetectedMarkers1
+        - /LaserScan1
       Splitter Ratio: 0.5
     Tree Height: 768
   - Class: rviz/Selection
@@ -27,7 +28,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Visualization Manager:
   Class: ""
   Displays:
@@ -57,11 +58,107 @@ Visualization Manager:
         my_namespace: true
       Queue Size: 100
       Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /wall_detector/detected_walls
+      Name: DetectedWalls
+      Namespaces:
+        my_namespace: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /pillar_detector/detected_pillars
+      Name: DetectedPillars
+      Namespaces:
+        my_namespace: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/MarkerArray
+      Enabled: true
+      Marker Topic: /ropod_semantic_localization/detected_markers
+      Name: DetectedMarkers
+      Namespaces:
+        my_namespace: true
+      Queue Size: 100
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        camera_link:
+          Value: true
+        load/base_link:
+          Value: true
+        map:
+          Value: true
+        my_frame:
+          Value: true
+        ropod/base_link:
+          Value: true
+        ropod/laser/scan:
+          Value: true
+        ropod/odom:
+          Value: true
+        ropod/sick_laser/scan:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          ropod/odom:
+            ropod/base_link:
+              camera_link:
+                {}
+              load/base_link:
+                {}
+              ropod/laser/scan:
+                {}
+              ropod/sick_laser/scan:
+                {}
+        my_frame:
+          {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/LaserScan
+      Color: 255; 255; 255
+      Color Transformer: Intensity
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 0
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: LaserScan
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.0799999982
+      Style: Spheres
+      Topic: /ropod/laser/scan
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: map
+    Fixed Frame: ropod/base_link
     Frame Rate: 30
   Name: root
   Tools:
@@ -82,25 +179,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 17.6234169
+      Distance: 11.8809223
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.552076817
-        Y: 6.26974344
-        Z: 4.55561781
+        X: -4.16803551
+        Y: 0.111155972
+        Z: 3.27371836
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.0500000007
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.585398316
+      Pitch: 0.685398281
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 3.33539653
+      Yaw: 3.17039895
     Saved: ~
 Window Geometry:
   Displays:

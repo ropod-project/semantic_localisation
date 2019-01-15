@@ -6,42 +6,378 @@
    </include>
    <include>
       <uri>model://ground_plane</uri>
-   </include>
+   </include> 
    
    <include>
-      <uri>model://ropod</uri>
-      <pose>-10.0 4.5 0.0 0.0 0.0 0.0</pose>      
+      <uri>model://ropod_camera_tilt</uri>
+      <pose>5.0 6.5 0.0 0.0 0.0 0.0</pose>      
+   </include>
+   
+   <!-- ___________________________SIGNS___________________________ -->
+   <!-- marker id corresponds to sign ID in JOSM map to get 1:1 mapping -->
+   <!-- no additional steps are necessary to link detection to correct sign -->
+     <include>
+      <uri>model://5x5_1000-10</uri>
+      <pose>29.507050 6.023 1.65 0.0 0.0 1.60479633</pose>      
     </include>
+    
+     <include>
+      <uri>model://5x5_1000-28</uri>
+      <pose>18.751480 5.656 1.65 0.0 0.0 1.60479633</pose>      
+    </include>
+    
+    <include>
+      <uri>model://5x5_1000-38</uri>
+      <pose>15.833782 5.558 1.65 0.0 0.0 1.60479633</pose>      
+    </include>
+    
+    <include>
+      <uri>model://5x5_1000-147</uri>
+      <pose>7.179252 12.37 1.65 0.0 0.0 -1.53679633</pose>      
+    </include>  
 
+    <include>
+      <uri>model://5x5_1000-222</uri>
+      <pose>9.47018 11.456 1.65 0.0 0.0 -1.53679633</pose>      
+    </include>      
+    
+    <include>
+      <uri>model://5x5_1000-247</uri>
+      <pose>12.034648 7.745499 1.65 0.0 0.0 -1.53679633</pose>      
+    </include>    
+
+    <include>
+      <uri>model://5x5_1000-289</uri>
+      <pose>9.696978 7.142428 2.1 0.0 0.0 3.17559265679</pose>      
+    </include>  
+    
+    <include>
+      <uri>model://5x5_1000-303</uri>
+      <pose>14.848505 7.835 1.65 0.0 0.0 -1.53679633</pose>      
+    </include>  
+    
+    <include>
+      <uri>model://5x5_1000-319</uri>
+      <pose>7.274438 10.104321 1.65 0.0 0.0 0.0340000032</pose>      
+    </include>    
+    
+    <include>
+      <uri>model://5x5_1000-338</uri>
+      <pose>3.737665 5.14 1.65 0.0 0.0 1.60479633</pose>      
+    </include>
+ 
+    <include>
+      <uri>model://5x5_1000-353</uri>
+      <pose>23.156761 5.818199 1.65 0.0 0.0 1.60479633</pose>      
+    </include>  
+    
+    <include>
+      <uri>model://5x5_1000-360</uri>
+      <pose>11.247857 5.4 1.65 0.0 0.0 1.60479633</pose>      
+    </include> 
+    
+    <include>
+      <uri>model://5x5_1000-406</uri>
+      <pose>9.822988 6.34 1.65 0.0 0.0 1.60479633</pose>      
+    </include>    
+ 
+    <include>
+      <uri>model://5x5_1000-438</uri>
+      <pose>23.00717 8.02 1.65 0.0 0.0 -1.53679633</pose>      
+    </include>     
+    
+    <include>
+      <uri>model://5x5_1000-445</uri>
+      <pose>8.239839 5.30 1.65 0.0 0.0 1.60479633</pose>      
+    </include> 
+    
+     <!-- ___________________________PILLARS___________________________ -->
     <include>
       <uri>model://pillar</uri>
       <name>pillar1</name>
+      <static>true</static>
       <pose>32.100510 6.769004 0.0 0.0 0.0 0.0</pose>      
     </include>
     
     <include>
       <uri>model://pillar</uri>
       <name>pillar2</name>
+      <static>true</static>
       <pose>2.342716 5.768001 0.0 0.0 0.0 0.0</pose>      
     </include>
     
     <include>
       <uri>model://pillar</uri>
       <name>pillar3</name>
+      <static>true</static>
       <pose>17.231846 6.274395 0.0 0.0 0.0 0.0</pose>      
     </include> 
   
     <include>
       <uri>model://pillar</uri>
       <name>pillar4</name>
+      <static>true</static>
       <pose>24.666746 6.505016 0.0 0.0 0.0 0.0</pose>      
     </include> 
     
     <include>
       <uri>model://pillar</uri>
       <name>pillar5</name>
+      <static>true</static>
       <pose>9.784185 6.009955 0.0 0.0 0.0 0.0</pose>      
     </include> 
+   
+    <!-- ___________________________DOORS___________________________ -->
+    <!-- doors and markers are spawned separate could be combined in 1 model -->
+    <!-- makes figuring out door angle more difficult but marker is automatically attached to door -->
+    <!-- door detection should be replaced anyways (not marker based) -->
+    
+    <include>
+      <uri>model://door_yellow</uri>
+      <name>door1</name>
+      <static>true</static>
+      <pose>3.050000 5.000000 0.0 0.0 0.0 0.034</pose>      
+    </include> 
+    
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker1 </name>
+      <pose>3.05 5.075 0.8 0.0 0.0 1.60479633</pose>      
+    </include>
+    
+    <include>
+      <uri>model://door_yellow</uri>
+      <name>door2</name>
+      <static>true</static>
+      <pose>9.050000 5.200000 0.0 0.0 0.0 0.034000</pose>      
+    </include> 
+    
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker2 </name>
+      <pose>9.050000 5.275000 0.8 0.0 0.0 1.60479633</pose>      
+    </include>
+    
+   <include>
+      <uri>model://door_yellow</uri>
+      <name>door3</name>
+      <static>true</static>
+      <pose>10.60000 5.250000 0.0 0.0 0.0 0.034000</pose>      
+    </include> 
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker3 </name>
+      <pose>10.60000 5.325000 0.8 0.0 0.0 1.60479633</pose>      
+    </include>    
+    
+   <include>
+      <uri>model://door_yellow</uri>
+      <name>door4</name>
+      <static>true</static>
+      <pose>16.40000 5.470000 0.0 0.0 0.0 0.034000</pose>      
+    </include> 
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker4 </name>
+      <pose>16.40000 5.545000 0.8 0.0 0.0 1.60479633</pose>      
+    </include>     
+    
+   <include>
+      <uri>model://door_yellow</uri>
+      <name>door5</name>
+      <static>true</static>
+      <pose>18.0000 5.490000 0.0 0.0 0.0 0.034000</pose>      
+    </include>     
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker5 </name>
+      <pose>18.0000 5.565000 0.8 0.0 0.0 1.60479633</pose>      
+    </include>      
+    
+   <include>
+      <uri>model://door_yellow</uri>
+      <name>door6</name>
+      <static>true</static>
+      <pose>23.8500 5.680000 0.0 0.0 0.0 0.034000</pose>      
+    </include>      
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker6 </name>
+      <pose>23.8500 5.755000 0.8 0.0 0.0 1.60479633</pose>      
+    </include>     
+    
+   <include>
+      <uri>model://door_yellow</uri>
+      <name>door7</name>
+      <static>true</static>
+      <pose>30.1500 5.850000 0.0 0.0 0.0 0.034000</pose>      
+    </include>      
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker7 </name>
+      <pose>30.1500 5.9250000 0.8 0.0 0.0 1.60479633</pose>      
+    </include>     
+    
+   <include>
+      <uri>model://door_yellow</uri>
+      <name>door8</name>
+      <static>true</static>
+      <pose>32.9500 6.0000 0.0 0.0 0.0 0.034000</pose>      
+    </include>    
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker8 </name>
+      <pose>32.9500 6.07500 0.8 0.0 0.0 1.60479633</pose>      
+    </include>     
+    
+   <include>
+      <uri>model://door_red</uri>
+      <name>door9</name>
+      <static>true</static>
+      <pose>38.1500 7.8000 0.0 0.0 0.0 1.60479633</pose>      
+    </include> 
+
+     <include>
+      <uri>model://5x5_1000-1</uri>
+      <name> redmarker9 </name>
+      <pose>38.07500 7.8000 0.8 0.0 0.0 3.17559265679</pose>      
+    </include>     
+
+   <include>
+      <uri>model://door_red</uri>
+      <name>door10</name>
+      <static>true</static>
+      <pose>37.5 8.55 0.0 0.0 0.0 0.034</pose>      
+    </include>     
+
+     <include>
+      <uri>model://5x5_1000-1</uri>
+      <name> redmarker10 </name>
+      <pose>37.5 8.475 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>      
+    
+   <include>
+      <uri>model://door_green</uri>
+      <name>door11</name>
+      <static>true</static>
+      <pose>28.8 8.25 0.0 0.0 0.0 0.034</pose>      
+    </include>     
+
+     <include>
+      <uri>model://5x5_1000-2</uri>
+      <name> greenmarker11 </name>
+      <pose>28.8 8.175 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>     
+    
+   <include>
+      <uri>model://door_green</uri>
+      <name>door12</name>
+      <static>true</static>
+      <pose>27.9 8.22 0.0 0.0 0.0 0.034</pose>      
+    </include> 
+
+     <include>
+      <uri>model://5x5_1000-2</uri>
+      <name> greenmarker12 </name>
+      <pose>27.9 8.145 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>  
+    
+     <include>
+      <uri>model://door_yellow</uri>
+      <name>door13</name>
+      <static>true</static>
+      <pose>23.700 8.2000 0.0 0.0 0.0 0.034000</pose>      
+    </include>   
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker13 </name>
+      <pose>23.700 8.12500 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>     
+    
+     <include>
+      <uri>model://door_blue</uri>
+      <name>door14</name>
+      <static>true</static>
+      <pose>14.100 8.0000 0.0 0.0 0.0 0.034000</pose>      
+    </include>  
+
+     <include>
+      <uri>model://5x5_1000-3</uri>
+      <name> bluemarker14 </name>
+      <pose>14.100 7.92500 0.8 0.0 0.0 -1.53679633</pose>      
+    </include> 
+    
+    <include>
+      <uri>model://door_blue</uri>
+      <name>door15</name>
+      <static>true</static>
+      <pose>12.800 7.9600 0.0 0.0 0.0 0.034000</pose>      
+    </include>  
+
+     <include>
+      <uri>model://5x5_1000-3</uri>
+      <name> bluemarker15 </name>
+      <pose>12.800 7.8850 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>     
+    
+    <include>
+      <uri>model://door_yellow</uri>
+      <name>door16</name>
+      <static>true</static>
+      <pose>8.65 12.5800 0.0 0.0 0.0 0.034000</pose>      
+    </include>  
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker16 </name>
+      <pose>8.65 12.5050 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>     
+    
+    <include>
+      <uri>model://door_yellow</uri>
+      <name>door17</name>
+      <static>true</static>
+      <pose>7.65 12.5500 0.0 0.0 0.0 0.034000</pose>      
+    </include>  
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker17 </name>
+      <pose>7.65 12.4750 0.8 0.0 0.0 -1.53679633</pose>      
+    </include>      
+    
+    <include>
+      <uri>model://door_yellow</uri>
+      <name>door18</name>
+      <static>true</static>
+      <pose>6.98 11.85 0.0 0.0 0.0 1.60479633</pose>      
+    </include>   
+
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker18 </name>
+      <pose>7.055 11.85 0.8 0.0 0.0 0.034</pose>      
+    </include>     
+    
+    <include>
+      <uri>model://door_yellow</uri>
+      <name>door19</name>
+      <static>true</static>
+      <pose>7.0 10.68 0.0 0.0 0.0 1.60479633</pose>      
+    </include> 
+    
+     <include>
+      <uri>model://5x5_1000-0</uri>
+      <name> yellowmarker19 </name>
+      <pose>7.075 10.68 0.8 0.0 0.0 0.034</pose>      
+    </include>     
     
  </world>
 </sdf>

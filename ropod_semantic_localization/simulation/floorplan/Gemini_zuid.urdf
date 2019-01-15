@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<robot name="map">
+
+<origin rpy="0 0 0.034" xyz="18.9 12.3 0"/>
+
+<link name="map">
+	<inertial>
+		<mass value="10000"/>
+		<inertia
+			ixx="100000.0" ixy="0.0" ixz="0.0"
+			iyy="100000.0" iyz="0.0"
+			izz="100000.0"/>
+	</inertial>	  
+	
+	<visual name="map_visual">
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+		<geometry>
+			<mesh 
+				filename="/home/martin/catkin_ws_test/Map_test_swag/Gemini_zuid.stl"
+				scale="0.00125 0.00125 0.003"		
+			/>
+		</geometry>
+	</visual>
+	
+	<collision name="map_collision">	
+		<origin rpy="0 0 0" xyz="0 0 0"/>	
+		<geometry>
+			<mesh 
+				filename="/home/martin/catkin_ws_test/Map_test_swag/Gemini_zuid.stl"
+				scale="0.00125 0.00125 0.003"		
+			/>
+		</geometry>
+	</collision>   
+</link>  
+
+
+<gazebo>
+	<maxContacts>10</maxContacts>
+	<laserRetro>0</laserRetro>
+	<dampingFactor>0.1</dampingFactor>
+	<selfCollide>false</selfCollide>
+	<static>true</static>
+</gazebo>
+</robot>
+
+
+

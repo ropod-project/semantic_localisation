@@ -16,7 +16,7 @@
         <group unless="$(arg movingObjects)">
                 <include file="$(find gazebo_ros)/launch/empty_world.launch">
                         <!-- <arg name="verbose" value="true" /> -->
-                          <arg name="world_name" value="/home/martin/catkin_ws_test/src/ropod_semantic_localization/simulation/world/ropod.world"/>
+                          <arg name="world_name" value="/home/martin/catkin_ws_test/src/semantic_localisation/ropod_semantic_localization/simulation/world/ropod.world"/>
                 </include>
         </group>
 
@@ -29,3 +29,5 @@
 	
 	<node name="throttle" pkg="topic_tools" type="throttle" args="messages /$(arg robot)/laser_sim 20.0 /$(arg robot)/laser/scan" />  
 </launch>
+
+

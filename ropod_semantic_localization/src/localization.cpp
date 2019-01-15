@@ -1,8 +1,30 @@
 #include <ropod_semantic_localization/localization.h>
-Localization::Localization() : nh_("~"),ac("/osm_query", true), osm_query_result(), pd("/pillar_detector", true), pd_result()
+
+Localization::Localization( std::string robot) : nh_("~"),ac("/osm_query", true), osm_query_result(), 
+							  pd("/pillar_detector", true), pd_result(), 
+							  wd("/wall_detector",true), wd_result(),
+							  localization_server(nh_,"/localization_server",
+  boost::bind(&Localization::Localization_server_execute, this, _1),false)
 { 
-    ac.waitForServer();
-    pd.waitForServer();
+  odomtopic.append("/");
+  odomtopic.append( robot );
+  odomtopic.append("/odom");
+  baselinktf.append("/");
+  baselinktf.append( robot );
+  baselinktf.append("/base_link");
+  laserscantf.append("/");
+  laserscantf.append( robot );
+  laserscantf.append("/laser/scan");
+  InitializeOdomBuffer();
+  InitializeMarkerBuffer();
+  ROS_INFO("Waiting for OSM Query server");
+  ac.waitForServer(); // TODO this will wait for infinite time
+  ROS_INFO("Waiting for Pillardetector");
+  pd.waitForServer(); // script won't work without these servers starting
+  ROS_INFO("Waiting for Walldetector");
+  wd.waitForServer(); // maybe add timer + error message idem in querying script
+  ROS_INFO("Starting Localization server");
+  localization_server.start();
 }
 
 Localization::~Localization()
@@ -10,88 +32,64 @@ Localization::~Localization()
 
 }
 
-void Localization::InitializeOdomBuffer(std::string robot)
+void Localization::Localization_server_execute(const ropod_semantic_localization::LocalizationGoalConstPtr &goal)
 {
-  std::string topicname= "/";
-  topicname.append( robot );
-  topicname.append("/odom");
-  odom_sub = nh_.subscribe<nav_msgs::Odometry>("/ropod/odom", 1, &Localization::BufferOdomData, this);
-}
-
-void Localization::test()
-{ 
-  ropod_ros_msgs::OSMQueryGoal goal;
-  std::vector<int> goal_ids;
-  std::vector<int> feature_ids;
-  std::vector<ropod_ros_msgs::OSMNode> feature_nodes;
-  std::vector<ropod_ros_msgs::OSMRelation> side_relations;
-  std::vector<int> corner_ids;
-  std::vector<int> side_ids;
+  int plan_step = 0;
+  int current_area_id;
+  int next_area_id;
+  int current_motion_id;
+  bool transition = false;
+  bool aborted = false;
+  localarea current_area;
+  localarea next_area;
+  localmotion current_motion;
   pillar_detector::PillarDetectorGoal pd_goal;
-  ros::Rate r(1);
+  wall_detector::WallDetectorGoal wd_goal;
+  pd_goal.diameter = 0.65; // TODO: find diameters from map 
+  result.result = 1;
+
+  QueryAll( building_id ); 			// Big Query 
+  QueryLocalAreas( goal->localization_ids ); 	// uses result of big query to fill local areas
+  QueryLocalMotion( goal->motion_ids); 		// uses result of big query to fill local motion
+  current_area_id = goal->localization_ids[ plan_step ];
+  next_area_id = goal->localization_ids[ plan_step+1 ];
+  current_motion_id = goal->motion_ids[ plan_step ];
+  ros::Rate r(10);
   while(ros::ok)
   {
-    ros::spinOnce();
-    // Create Goal ID
-    goal_ids.push_back(building_id); 
-    goal.ids 	= goal_ids;  
-    
-    // Search all IDs that denote a feature or side
-    feature_ids = RecursiveSearch(goal,feature);
-    side_ids = RecursiveSearch(goal,side);
-    
-    // Store all Nodes that are features
-    goal.ids	= feature_ids;
-    feature_nodes = Query_Nodes( goal );
-    
-    // Find all Corner IDs and side Relations
-    goal.ids = side_ids;
-    corner_ids = Query_Corners( goal ); 
-    side_relations = Query_Sides( goal );
-    
-    // Visualize all features
-    VisualizeFeatures( feature_nodes );
-    // Use side relations to connect corners to visualize walls
-    VisualizeSides( corner_ids , side_relations );  
-    
-    // Check if odometry data is available
-    if( odom_buffer_.empty())
+    VisualizeFeatures(feature_nodes);
+    VisualizeSides(side_relations, corner_nodes);
+    VisualizeMarkerDetections();
+    SendGoalPD( pd_goal );
+    SendGoalWD( wd_goal );
+    current_area = SelectLocalArea( current_area_id );
+    //VisualizeFeatures( next_area.feature_nodes );
+    //VisualizeSides( next_area.sides, next_area.corners);
+    next_area = SelectLocalArea( next_area_id );
+    current_motion = SelectLocalMotion( current_motion_id ); 
+    LocalPoseTracking( current_area , next_area, current_motion );
+    DetectTransition( next_area );
+    if( transition && plan_step <= goal->motion_ids.size() )
     {
-      ROS_INFO("no Odometry available yet");
+      plan_step++;
+      current_area_id = goal->localization_ids[ plan_step ];
+      next_area_id = goal->localization_ids[ plan_step+1 ];
+      current_motion_id = goal->motion_ids[ plan_step ];  
     }
-    else
+    if( plan_step == goal->motion_ids.size() )
     {
-      // Get current Odometry data
-      odom_current = odom_buffer_.front();
-      tf::Quaternion q(odom_current->pose.pose.orientation.x , odom_current->pose.pose.orientation.y,odom_current->pose.pose.orientation.z,odom_current->pose.pose.orientation.w); 
-      double roll,pitch,yaw;
-      tf::Matrix3x3 m(q);
-      m.getRPY(roll, pitch,yaw);
-      // Create a pillar-detector goal
-      pd_goal = CreatePDGoal( feature_nodes , odom_current); // checks which features are pillars, determines relative position + covariance
-      SendGoalPD(pd_goal);
+      break;
     }
-    ROS_INFO("Finished querying");   
+    if( aborted )
+    {
+      localization_server.setAborted(result);
+    }
     r.sleep();
   }
+  ROS_INFO("Succeeded in executing current plan");
+  localization_server.setSucceeded(result);
 }
 
-void Localization::BufferOdomData(const nav_msgs::Odometry::ConstPtr& odom)
-{
-  ROS_INFO("updating odom");
-  if( odom_buffer_.empty())
-  {
-    odom_buffer_.push( odom );
-  }
-  else
-  {
-    while( !odom_buffer_.empty() )
-    {
-      odom_buffer_.pop();
-    }
-    odom_buffer_.push( odom );
-  }
-}
 
 int main(int argc, char **argv)
 {
@@ -99,10 +97,8 @@ int main(int argc, char **argv)
   std::string robot;
   ros::NodeHandle node;
   node.getParam("ropod_semantic_localization/robot", robot);
-  Localization localization;
-  localization.InitializeOdomBuffer( robot );
+  Localization localization(robot);
   ROS_INFO("Semantic Localization Ready!");
-  localization.test();
   ros::spin();
   return 0;
 }

@@ -1,6 +1,7 @@
-float32[] diameter
-geometry_msgs/PoseWithCovariance[] pose
-string detect
+float32 diameter
 ---
-int32 test
+float32[] x
+float32[] y
+float32[] inlierpercentage
 ---
+int32 iter

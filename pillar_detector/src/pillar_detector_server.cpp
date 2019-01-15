@@ -1,4 +1,4 @@
-#include "/home/martin/catkin_ws_test/src/pillar_detector/include/pillar_detector/pillar_detector.h"
+#include "/home/martin/catkin_ws_test/src/semantic_localisation/pillar_detector/include/pillar_detector/pillar_detector.h"
 //#include <pillar_detector/pillar_detector.h>
 
 PillarDetector::PillarDetector() : nh_("~"),pillar_detector_server(nh_,"/pillar_detector",
@@ -13,6 +13,7 @@ PillarDetector::~PillarDetector()
 
 void PillarDetector::InitializeBuffer(std::string robot)
 {
+  ROS_INFO("PillarDetector: initializing laser buffer");
   std::string topicname ="/";
   topicname.append(robot);
   topicname.append("/laser/scan");
@@ -21,40 +22,31 @@ void PillarDetector::InitializeBuffer(std::string robot)
 
 void PillarDetector::pillar_detector_server_execute(const pillar_detector::PillarDetectorGoalConstPtr &goal)
 { 
-  std::tuple<point,bool> test;
-  point pc;
-  result.test = 5;
-  scan_result = scan_buffer_.front();
-  if( scan_result!=scan_result)
+  //ROS_INFO("PillarDetector: Server is Ready!");
+  if( scan_buffer_.empty() )
   {
-    ROS_INFO("no laserscan available yet");
+    ROS_INFO("PillarDetector: nothing buffered yet");
   }
   else
   {
-    Detect( goal );
-    if( goal->detect == "target" && !goal->pose.empty())
+    scan_result = scan_buffer_.front();
+    Detect( goal ); 
+  }
+  result.x.clear();
+  result.y.clear();
+  result.inlierpercentage.clear();
+  int i = 0;
+  if( !pillars.empty())
+  {
+    for( auto it_pillar = pillars.begin(); it_pillar < pillars.end(); it_pillar++)
     {
-      ROS_INFO("Detecting target pillar(s)");
-    }
-    else if( goal->detect == "all" )
-    {
-      ROS_INFO("Detecting all pillars");
-    }
-    else
-    {
-      ROS_INFO("No detection target(s) set, default = detect all");
+      result.x.push_back( std::get<0>(pillars[i]).x );
+      result.y.push_back( std::get<0>(pillars[i]).y );
+      result.inlierpercentage.push_back( std::get<1>(pillars[i]) );
+      i++;
     }
   }
-  
-  
-   if( true)
-    {
-      pillar_detector_server.setSucceeded(result);
-    }
-    else
-    {
-      pillar_detector_server.setAborted(result);
-    } 
+  pillar_detector_server.setSucceeded(result);
 }
 
 void PillarDetector::displayLaserdata(const sensor_msgs::LaserScan::ConstPtr& scan)

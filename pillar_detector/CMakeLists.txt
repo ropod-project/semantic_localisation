@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate actions in the 'action' folder
 add_action_files(
-	DIRECTORY action
+  DIRECTORY action
   FILES
   PillarDetector.action
 )
@@ -45,9 +45,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## add_executable(detector src/detector.cpp src/circleransac.cpp)
-## target_link_libraries(detector ${catkin_LIBRARIES})
-
 add_executable( detector_server src/pillar_detector_server.cpp src/pillar_detector_code.cpp)
 target_link_libraries(detector_server ${catkin_LIBRARIES})
 add_dependencies(
@@ -55,4 +52,9 @@ add_dependencies(
   ${pillar_detector_EXPORTED_TARGETS}
 )
 
-
+add_executable( detector_test src/pillar_detector_test.cpp)
+target_link_libraries(detector_test ${catkin_LIBRARIES})
+add_dependencies(
+  detector_test	
+  ${pillar_detector_EXPORTED_TARGETS}
+)

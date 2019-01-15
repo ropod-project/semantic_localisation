@@ -15,12 +15,28 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
   ropod_ros_msgs
   roscpp
+  tf
 )
 
-catkin_package(CATKIN_DEPENDS
-  roscpp
-  ropod_ros_msgs
+## Generate actions in the 'action' folder
+add_action_files(
+  DIRECTORY action
+  FILES
+  Localization.action
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
   actionlib_msgs
+)
+
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES ropod_semantic_localization
+#  CATKIN_DEPENDS roscpp rospy std_msgs
+#  DEPENDS system_lib
 )
 
 include_directories(
@@ -28,9 +44,14 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(ropod_semantic_localization src/localization.cpp src/querying.cpp src/visualization.cpp)
+add_executable(semantic_planner src/planner.cpp)
+add_dependencies(semantic_planner ropod_ros_msgs_gencpp)
+target_link_libraries(semantic_planner ${LIBS} ${catkin_LIBRARIES})
+
+add_executable(ropod_semantic_localization src/localization.cpp src/querying.cpp src/visualization.cpp src/localization_code.cpp)
 add_dependencies(ropod_semantic_localization ropod_ros_msgs_gencpp)
 target_link_libraries(ropod_semantic_localization ${LIBS} ${catkin_LIBRARIES})
 
-
-
+add_executable(tf_broadcaster_localization src/tf_broadcaster_localization.cpp)
+add_dependencies(tf_broadcaster_localization ropod_ros_msgs_gencpp)
+target_link_libraries(tf_broadcaster_localization ${LIBS} ${catkin_LIBRARIES})
